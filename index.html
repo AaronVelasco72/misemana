@@ -132,7 +132,7 @@ h1{font-size:clamp(26px,3.6vw,44px);font-weight:800;margin:0;letter-spacing:-.02
 .night:hover{background:repeating-linear-gradient(135deg,rgba(92,124,250,.30) 0 7px,rgba(92,124,250,.14) 7px 14px)}
 
 .blk{position:absolute;left:3px;right:3px;border-radius:10px;background:var(--c);color:var(--t);padding:5px 8px 6px 10px;overflow:hidden;cursor:pointer;
-  box-shadow:inset 4px 0 0 rgba(0,0,0,.2),inset 0 1px 0 rgba(255,255,255,.35),0 6px 18px -10px var(--c);user-select:none;-webkit-user-select:none;
+  box-shadow:inset 4px 0 0 rgba(0,0,0,.2),inset 0 1px 0 rgba(255,255,255,.35),0 6px 18px -10px var(--c);user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;
   transition:box-shadow .15s,filter .15s;z-index:2}
 .blk:hover{filter:brightness(1.06);box-shadow:inset 4px 0 0 rgba(0,0,0,.2),0 0 0 2px rgba(255,255,255,.75),0 8px 22px -8px var(--c);z-index:4}
 .blk .t{font-weight:700;font-size:13px;line-height:1.15;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-right:30px}
@@ -149,6 +149,9 @@ h1{font-size:clamp(26px,3.6vw,44px);font-weight:800;margin:0;letter-spacing:-.02
 .blk.flex{cursor:grab}
 .blk.drag{z-index:30;cursor:grabbing;box-shadow:0 16px 34px -10px rgba(0,0,0,.7),0 0 0 2px #fff;filter:brightness(1.08)}
 .rz{position:absolute;left:0;right:0;bottom:0;height:10px;cursor:ns-resize;touch-action:none}
+.mv{display:none;position:absolute;top:0;right:0;bottom:12px;width:34px;touch-action:none;cursor:grab;align-items:center;justify-content:center}
+.mv i{width:10px;height:18px;max-height:70%;opacity:.55;background:radial-gradient(circle,currentColor 1.6px,transparent 2px) 0 0/5px 6px}
+@media (pointer:coarse){.blk.flex .mv{display:flex}.blk.flex .du{right:38px}.blk.flex .t{padding-right:72px}.blk.flex.xs .t{padding-right:36px}}
 .rz::after{content:'';position:absolute;left:50%;bottom:3px;width:26px;height:3px;margin-left:-13px;border-radius:2px;background:currentColor;opacity:.3}
 .blk:hover .rz::after,.blk.drag .rz::after{opacity:.85}
 .gap{position:absolute;left:3px;right:3px;border-radius:10px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;
@@ -329,7 +332,7 @@ textarea.inp{min-height:150px;font-family:'DM Mono',monospace;font-size:12px;res
   <div class="main">
     <div>
       <div class="tabs" id="tabs"></div>
-      <div class="mobhint">Desliza ← → sobre el calendario para cambiar de día</div>
+      <div class="mobhint">Desliza ← → para cambiar de día · arrastra un bloque desde los puntitos ⠿ para moverlo</div>
       <div class="cal" id="cal"></div>
       <section class="sum" id="sum"></section>
     </div>
@@ -670,7 +673,7 @@ function blkHTML(d,it,dragId){
     inner+=`<span class="du">${fdur(b.dur)}</span>`;
   }
   const tt=`${b.title} · ${fmt(it.s)}–${fmt(it.e)} (${fdur(b.dur)})${it.conf?' — se empalma con '+(it.with||'otro bloque'):''}${it.over?' — se pasa de las 23:00':''}`;
-  return `<div class="${cls}" data-day="${d}" data-id="${esc(b.id)}" title="${esc(tt)}" style="top:${top}px;height:${h}px;--c:${b.color};--t:${ink(b.color)}">${inner}<div class="rz"></div></div>`;
+  return `<div class="${cls}" data-day="${d}" data-id="${esc(b.id)}" title="${esc(tt)}" style="top:${top}px;height:${h}px;--c:${b.color};--t:${ink(b.color)}">${inner}${b.fixed?'':'<div class="mv" aria-label="Mover"><i></i></div>'}<div class="rz"></div></div>`;
 }
 function awakeGaps(L,d){
   const a=Math.max(START,wakeOf(d)),z=Math.min(END,bedOf(d));
@@ -801,6 +804,15 @@ cal.addEventListener('pointerdown',e=>{
   if(e.pointerType==='mouse'&&e.button!==0)return;
   if(e.target.closest('[data-daymenu],.slc,.night'))return;
   const rz=e.target.closest('.rz'),blk=e.target.closest('.blk'),gap=e.target.closest('.gap');
+  const mv=e.target.closest('.mv');
+  if(mv&&blk){
+    e.preventDefault();
+    const d=+blk.dataset.day,id=blk.dataset.id,b=findBlock(d,id);if(!b||b.fixed)return;
+    drag={mode:'move',kind:'blk',d,td:d,id,x0:e.clientX,y0:e.pageY,origStart:b.start,dur:b.dur,snap:clone(state.days),before:snapshot()};
+    try{navigator.vibrate&&navigator.vibrate(10)}catch(err){}
+    renderGrid(null,id);showTip(e.clientX,e.clientY,'Arrastra para mover · '+fmt(b.start));
+    return;
+  }
   if(rz&&blk){
     e.preventDefault();
     const d=+blk.dataset.day,id=blk.dataset.id,b=findBlock(d,id);if(!b)return;
@@ -810,7 +822,8 @@ cal.addEventListener('pointerdown',e=>{
   }
   if(blk){
     const d=+blk.dataset.day,id=blk.dataset.id,b=findBlock(d,id);if(!b)return;
-    drag={mode:'tap',kind:'blk',d,id,x0:e.clientX,y0:e.pageY,canMove:e.pointerType==='mouse'&&!b.fixed,origStart:b.start,dur:b.dur};
+    const D={mode:'tap',kind:'blk',d,id,x0:e.clientX,y0:e.pageY,canMove:e.pointerType==='mouse'&&!b.fixed,origStart:b.start,dur:b.dur,touch:e.pointerType!=='mouse'};
+    drag=D;
     return;
   }
   if(gap){drag={mode:'tap',kind:'gap',d:+gap.dataset.day,s:+gap.dataset.s,e:+gap.dataset.e,x0:e.clientX,y0:e.pageY,
@@ -821,11 +834,25 @@ $('#palette').addEventListener('pointerdown',e=>{
   e.preventDefault();
   drag={mode:'preset-wait',cat:p.dataset.preset,x0:e.clientX,y0:e.clientY};
 });
+function doMove(cx,cy,py){
+  autoScroll(cy);
+  const h=hitCol(cx,cy);const td=h?h.d:drag.d;
+  const ns=clamp(snap(drag.origStart+(py-drag.y0)/PX,5),START,END-drag.dur);
+  state.days=clone(drag.snap);
+  const src=state.days[drag.d],b=src.find(x=>x.id===drag.id);
+  if(!b)return;
+  state.days[drag.d]=src.filter(x=>x.id!==drag.id);
+  b.start=ns;b.ord=minOrd(state.days[td])-1;state.days[td].push(b);
+  drag.td=td;drag.moved=true;
+  renderGrid({day:td,id:drag.id},drag.id);
+  showTip(cx,cy,`${DS[td]} ${fmt(ns)}–${fmt(ns+drag.dur)}`);
+}
 window.addEventListener('pointermove',e=>{
   if(!drag)return;
   if(drag.mode==='tap'){
     const moved=Math.hypot(e.clientX-drag.x0,e.pageY-drag.y0);
-    if(moved>5){
+    if(moved>(drag.touch?9:5)){
+      clearTimeout(drag.lp);
       if(drag.kind==='blk'&&drag.canMove){drag.mode='move';drag.snap=clone(state.days);drag.before=snapshot()}
       else{drag=null;return}
     }else return;
@@ -840,18 +867,7 @@ window.addEventListener('pointermove',e=>{
     return;
   }
   if(drag.mode==='move'){
-    e.preventDefault();autoScroll(e.clientY);
-    const h=hitCol(e.clientX,e.clientY);const td=h?h.d:drag.d;
-    const ns=clamp(snap(drag.origStart+(e.pageY-drag.y0)/PX,5),START,END-drag.dur);
-    state.days=clone(drag.snap);
-    const src=state.days[drag.d],b=src.find(x=>x.id===drag.id);
-    if(!b)return;
-    state.days[drag.d]=src.filter(x=>x.id!==drag.id);
-    b.start=ns;b.ord=minOrd(state.days[td])-1;state.days[td].push(b);
-    drag.td=td;
-    renderGrid({day:td,id:drag.id},drag.id);
-    showTip(e.clientX,e.clientY,`${DS[td]} ${fmt(ns)}–${fmt(ns+drag.dur)}`);
-    return;
+    e.preventDefault();doMove(e.clientX,e.clientY,e.pageY);return;
   }
   if(drag.mode==='preset-wait'){
     if(Math.hypot(e.clientX-drag.x0,e.clientY-drag.y0)<6)return;
@@ -866,9 +882,11 @@ window.addEventListener('pointermove',e=>{
     else g.textContent=`${c.e} ${c.n} · suéltalo en un día`;
   }
 },{passive:false});
+let lastDragEnd=0;
 function endDrag(e,cancel){
   if(!drag)return;
-  const D=drag;drag=null;hideTip();$('#ghost').style.display='none';
+  const D=drag;drag=null;clearTimeout(D.lp);hideTip();$('#ghost').style.display='none';
+  if(D.mode!=='tap')lastDragEnd=Date.now();
   if(cancel){if(D.snap){state.days=D.snap;renderAll()}return}
   if(D.mode==='tap'){
     if(D.kind==='blk')openBlock(D.d,D.id);
@@ -896,6 +914,8 @@ function endDrag(e,cancel){
     toast(`${c.e} ${c.n} agregado el ${DAYS[h.d]} · tócalo para ajustarlo`);
   }
 }
+document.addEventListener('touchmove',e=>{if(drag&&drag.mode!=='tap'&&drag.mode!=='preset-wait'&&e.cancelable)e.preventDefault()},{passive:false});
+cal.addEventListener('contextmenu',e=>{if(e.target.closest('.blk'))e.preventDefault()});
 window.addEventListener('pointerup',e=>endDrag(e,false));
 window.addEventListener('pointercancel',e=>endDrag(e,true));
 function activeDayForAdd(){return matchMedia('(max-width:899px)').matches?activeDay:(todayIdx>=0?todayIdx:0)}
@@ -915,7 +935,8 @@ let swp=null;
 cal.addEventListener('touchstart',e=>{if(!isMobile()||e.touches.length!==1){swp=null;return}const t=e.touches[0];swp={x:t.clientX,y:t.clientY,t:Date.now()}},{passive:true});
 cal.addEventListener('touchend',e=>{
   if(!swp)return;const s=swp;swp=null;
-  if(drag&&drag.mode==='resize')return;
+  if(drag&&drag.mode!=='tap')return;
+  if(Date.now()-lastDragEnd<400)return;
   if(e.target.closest&&e.target.closest('.rz'))return;
   const t=e.changedTouches[0],dx=t.clientX-s.x,dy=t.clientY-s.y;
   if(Math.abs(dx)>60&&Math.abs(dx)>1.6*Math.abs(dy)&&Date.now()-s.t<700){drag=null;setActiveDay(activeDay+(dx<0?1:-1),dx<0?1:-1)}
