@@ -7,3 +7,7 @@ Sitio estático (un solo `index.html`), sin build. En Vercel: **Framework Preset
 Al abrirla pide perfil: **Aarón** (con su horario) o **Luis** (en blanco). Cada perfil guarda lo suyo por separado.
 
 Los datos se guardan en el navegador (localStorage). Para pasarlos a otro dispositivo: **⋯ Más → Descargar respaldo** y luego **Importar archivo** en el otro.
+
+## App en el celular
+
+Es una PWA: en **Android (Chrome)** sale "Instalar app"; en **iPhone (Safari)** botón Compartir → **Agregar a inicio**. Funciona sin internet gracias a `sw.js`.

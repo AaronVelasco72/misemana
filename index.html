@@ -275,6 +275,36 @@ textarea.inp{min-height:150px;font-family:'DM Mono',monospace;font-size:12px;res
   .dlg,.dlg.wide{width:100%;max-height:90vh;border-radius:22px 22px 0 0;padding-bottom:env(safe-area-inset-bottom)}
   .df{position:sticky;bottom:0;background:var(--panel);z-index:2}
   .toast{bottom:calc(14px + env(safe-area-inset-bottom))}
+  .wrap{padding-bottom:calc(100px + env(safe-area-inset-bottom))}
+  header.top{position:relative;display:block}
+  .eyebrow{text-align:left!important}
+  .ey-t{display:none}
+  .tools{position:absolute;top:-2px;right:0;width:auto!important;overflow:visible!important;gap:6px}
+  .tools .bt,#redo,.zseg,#sleepBtn,#sync{display:none!important}
+  .tools .seg{border:0}
+  .tools .btn{padding:7px 12px;font-size:15px}
+  .wk{margin-top:12px}
+  .palette{display:none}
+  body[data-view="cal"] .side,body[data-view="cal"] .sum{display:none}
+  body:not([data-view="cal"]) .tabs,body:not([data-view="cal"]) .mobhint,body:not([data-view="cal"]) .cal,body:not([data-view="cal"]) .nowc{display:none!important}
+  body[data-view="notes"] #sleepCard,body[data-view="notes"] .sum{display:none}
+  body[data-view="sleep"] #notesCard,body[data-view="sleep"] .sum{display:none}
+  body[data-view="stats"] .side{display:none}
+  .main{margin-top:12px}
+  .sum{margin-top:0}
+  .card>summary{pointer-events:none}
+  .card>summary::after{display:none}
+  nav.bnav{display:flex;position:fixed;left:10px;right:10px;bottom:calc(10px + env(safe-area-inset-bottom));z-index:90;background:rgba(21,23,42,.9);
+    backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px solid var(--line2);border-radius:24px;padding:6px 4px;justify-content:space-around;align-items:center;box-shadow:0 18px 40px -12px rgba(0,0,0,.85)}
+  .bn{flex:1;background:none;border:0;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:10.5px;font-weight:700;color:var(--mut);padding:5px 0;position:relative;cursor:pointer}
+  .bn b{font-size:20px;line-height:1;filter:grayscale(.6);opacity:.75;transition:transform .15s}
+  .bn.on{color:#fff}
+  .bn.on b{filter:none;opacity:1;transform:translateY(-2px) scale(1.12)}
+  .bn .bd{position:absolute;top:0;left:calc(50% + 6px);background:#ff5c7a;color:#fff;border-radius:999px;font-size:10px;padding:0 5px;line-height:15px}
+  .bn .bd:empty{display:none}
+  .fab{flex:none;width:58px;height:58px;border-radius:50%;border:3px solid var(--bg);background:linear-gradient(135deg,#ff6bcb,#845ef7);color:#fff;font-size:30px;line-height:1;margin-top:-30px;box-shadow:0 10px 24px -6px rgba(132,94,247,.85);cursor:pointer}
+  .fab:active{transform:scale(.94)}
+  .toast{bottom:calc(96px + env(safe-area-inset-bottom))}
   .col.on.in-l{animation:inl .22s ease}
   .col.on.in-r{animation:inr .22s ease}
 }
@@ -297,6 +327,12 @@ textarea.inp{min-height:150px;font-family:'DM Mono',monospace;font-size:12px;res
 .pk-n{font-size:24px;font-weight:800}
 .pk-d{font-size:13px;color:var(--mut);line-height:1.35}
 .pk-rem{font-size:13px;color:var(--mut);display:flex;gap:8px;align-items:center;cursor:pointer}
+.bnav{display:none}
+.nowc{display:none;margin:4px 0 10px;padding:10px 12px;border-radius:16px;background:var(--panel);border:1px solid var(--line2);font-size:14px;line-height:1.35;align-items:center;gap:10px}
+.nowc.show{display:flex}
+.nowc .dot{width:10px;height:10px;border-radius:50%;flex:none;box-shadow:0 0 0 4px rgba(255,255,255,.06)}
+.nowc .nx{color:var(--mut);font-size:12.5px;margin-top:2px}
+.nowc b{font-weight:800}
 .mobhint{display:none;font-size:12px;color:var(--mut);text-align:center;margin:-4px 0 4px}
 </style>
 </head>
@@ -304,7 +340,7 @@ textarea.inp{min-height:150px;font-family:'DM Mono',monospace;font-size:12px;res
 <div class="wrap">
   <header class="top">
     <div>
-      <div class="eyebrow"><button class="who" id="whoBtn" title="Cambiar de perfil"><span class="who-av" id="whoAv">A</span><span id="whoName">Aarón</span> ⇄</button> · Mi semana ✦ 4:00 – 23:00</div>
+      <div class="eyebrow"><button class="who" id="whoBtn" title="Cambiar de perfil"><span class="who-av" id="whoAv">A</span><span id="whoName">Aarón</span> ⇄</button><span class="ey-t"> · Mi semana ✦ 4:00 – 23:00</span></div>
       <div class="wk">
         <button class="btn ic" id="wprev" title="Semana anterior">‹</button>
         <h1 id="wtitle">Semana</h1>
@@ -315,16 +351,16 @@ textarea.inp{min-height:150px;font-family:'DM Mono',monospace;font-size:12px;res
     <div class="tools">
       <span class="pill" id="sync">💾 Guardado en este dispositivo</span>
       <div class="seg">
-        <button class="btn" id="undo" title="Deshacer (Ctrl+Z)">↶ Deshacer</button>
+        <button class="btn" id="undo" title="Deshacer (Ctrl+Z)">↶<span class="bt"> Deshacer</span></button>
         <button class="btn" id="redo" title="Rehacer (Ctrl+Y)">↷</button>
       </div>
-      <div class="seg">
+      <div class="seg zseg">
         <button class="btn" id="zout" title="Alejar">−</button>
         <button class="btn" id="zin" title="Acercar">＋</button>
       </div>
       <button class="btn" id="sleepBtn">😴 Sueño</button>
-      <button class="btn pri" id="exportBtn">⬇ Exportar</button>
-      <button class="btn" id="more">⋯ Más</button>
+      <button class="btn pri" id="exportBtn">⬇<span class="bt"> Exportar</span></button>
+      <button class="btn" id="more">⋯<span class="bt"> Más</span></button>
     </div>
   </header>
 
@@ -333,6 +369,7 @@ textarea.inp{min-height:150px;font-family:'DM Mono',monospace;font-size:12px;res
     <div>
       <div class="tabs" id="tabs"></div>
       <div class="mobhint">Desliza ← → para cambiar de día · arrastra un bloque desde los puntitos ⠿ para moverlo</div>
+      <div class="nowc" id="nowCard"></div>
       <div class="cal" id="cal"></div>
       <section class="sum" id="sum"></section>
     </div>
@@ -358,6 +395,13 @@ textarea.inp{min-height:150px;font-family:'DM Mono',monospace;font-size:12px;res
 <div class="tip" id="tip"></div>
 <div class="ghost" id="ghost"></div>
 <div class="pick" id="pick"></div>
+<nav class="bnav" id="bnav">
+  <button class="bn on" data-view="cal"><b>📅</b>Día</button>
+  <button class="bn" data-view="notes"><b>📝</b>Pendientes<span class="bd" id="bnN"></span></button>
+  <button class="fab" id="fab" aria-label="Agregar actividad">＋</button>
+  <button class="bn" data-view="sleep"><b>😴</b>Sueño</button>
+  <button class="bn" data-view="stats"><b>📊</b>Resumen</button>
+</nav>
 
 <script>
 (function(){
@@ -755,7 +799,7 @@ function renderNotes(){
     +`<button type="button" class="chip ${noteStar?'on':''}" data-nstar0="1" title="Importante">⭐</button>`;
   const ns=state.notes.slice().sort((a,b)=>(a.done-b.done)||(b.star-a.star)||(a.day-b.day));
   const pend=state.notes.filter(n=>!n.done).length;
-  $('#ncnt').textContent=pend?String(pend):'';
+  $('#ncnt').textContent=pend?String(pend):'';$('#bnN').textContent=pend?String(pend):'';
   $('#nlist').innerHTML=ns.length?ns.map(n=>`<div class="nit ${n.done?'done':''} ${n.star&&!n.done?'star':''}">
       <button class="ck" data-nck="${esc(n.id)}" title="Hecho">${n.done?'✓':''}</button>
       <span class="ntx" data-ned="${esc(n.id)}" title="Toca para editar">${esc(n.text)}</span>
@@ -773,7 +817,7 @@ function renderSleepCard(){
   $('#sleepBox').innerHTML=rows+`<div class="slavg"><span>Promedio <b style="color:${sleepColor(avg)}">${fdur(snap(avg,5))}</b> · meta ${fdur(g)}</span><button class="btn sm" data-sleepall="1">Ajustar</button></div>`;
 }
 function renderAll(pin,dragId){
-  renderHead();renderGrid(pin,dragId);renderTabs();renderSummary();renderNotes();renderSleepCard();
+  renderHead();renderGrid(pin,dragId);renderTabs();renderSummary();renderNotes();renderSleepCard();renderNow();
   $('#undo').disabled=!undoStack.length;$('#redo').disabled=!redoStack.length;
 }
 
@@ -925,7 +969,7 @@ cal.addEventListener('click',e=>{
   const sl=e.target.closest('[data-sleep]');if(sl)openSleep(+sl.dataset.sleep);
 });
 function setActiveDay(d,dir){
-  activeDay=(d+7)%7;renderTabs();
+  activeDay=(d+7)%7;renderTabs();renderNow();
   cal.querySelectorAll('.col').forEach(c=>{const on=+c.dataset.col===activeDay;c.classList.toggle('on',on);c.classList.remove('in-l','in-r');if(on&&dir){void c.offsetWidth;c.classList.add(dir>0?'in-r':'in-l')}});
   const t=$('#tabs [data-tab="'+activeDay+'"]');if(t&&t.scrollIntoView)t.scrollIntoView({block:'nearest',inline:'nearest'});
 }
@@ -1360,7 +1404,47 @@ document.addEventListener('keydown',e=>{
   if((e.ctrlKey||e.metaKey)&&k==='z'&&!e.shiftKey){e.preventDefault();undo()}
   else if((e.ctrlKey||e.metaKey)&&(k==='y'||(k==='z'&&e.shiftKey))){e.preventDefault();redo()}
 });
-setInterval(()=>{if(!drag&&!modal)renderGrid()},60000);
+setInterval(()=>{if(!drag&&!modal){renderGrid();renderNow()}},60000);
+/* ---------- mobile app shell ---------- */
+function setView(v){
+  document.body.dataset.view=v;
+  document.querySelectorAll('.bn').forEach(b=>b.classList.toggle('on',b.dataset.view===v));
+  if(v==='notes')$('#notesCard').open=true;
+  if(v==='sleep')$('#sleepCard').open=true;
+  window.scrollTo(0,0);
+}
+$('#bnav').addEventListener('click',e=>{
+  const b=e.target.closest('.bn');if(b){setView(b.dataset.view);return}
+  if(e.target.closest('#fab'))quickAdd();
+});
+function quickAdd(){
+  const d=isMobile()?activeDay:(todayIdx>=0?todayIdx:activeDay);
+  const L=layout(state.days[d]);const n=new Date(),nm=n.getHours()*60+n.getMinutes();
+  let g=null;
+  if(d===todayIdx)g=awakeGaps(L,d).find(x=>x.e-Math.max(x.s,snap(nm,15))>=15);
+  if(!g)g=awakeGaps(L,d).find(x=>x.e-x.s>=15);
+  if(!g)g=L.gaps.filter(x=>x.e-x.s>=15).pop()||{s:START,e:START+60};
+  let s=g.s;if(d===todayIdx&&nm>g.s&&nm<g.e)s=Math.min(snap(nm,15),g.e-15);
+  if(document.body.dataset.view!=='cal')setView('cal');
+  openNew(d,s,Math.min(60,g.e-s),'estudio');
+}
+function renderNow(){
+  const el=$('#nowCard');
+  const d=todayIdx;
+  if(d<0||(isMobile()&&activeDay!==d)){el.classList.remove('show');return}
+  const n=new Date(),m=n.getHours()*60+n.getMinutes();
+  const its=layout(state.days[d]).items,cur=its.find(i=>i.s<=m&&m<i.e),nxt=its.find(i=>i.s>m);
+  const wk=wakeOf(d),bd=bedOf(d);let dot='#63e6be',main,sub='';
+  if(cur){dot=cur.b.color;main=`Ahora: <b>${esc(cur.b.title)}</b> · hasta ${fmt(cur.e)} (${fdur(cur.e-m)})`}
+  else if(m<wk){dot='#5c7cfa';main=`😴 Durmiendo · te levantas ${fmt(wk)}`}
+  else if(m>=bd){dot='#5c7cfa';main=`🌙 Hora de dormir (${fmt(bd)}) · noche de ${fdur(nightOf(d))}`}
+  else{main=`🫧 Libre${nxt?' hasta '+fmt(nxt.s):''}`}
+  if(nxt&&!(m>=bd))sub=`Sigue: ${esc(nxt.b.title)} a las ${fmt(nxt.s)}`;
+  el.innerHTML=`<span class="dot" style="background:${dot}"></span><div><div>${main}</div>${sub?`<div class="nx">${sub}</div>`:''}</div>`;
+  el.classList.add('show');
+}
+document.body.dataset.view='cal';
+if(STANDALONE&&'serviceWorker' in navigator&&location.protocol==='https:'){window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}))}
 
 renderPalette();setZoom(prefs.z);
 if(prefs.remember&&prefs.last){booted=true;loadProfile(prefs.last)}
